@@ -1,0 +1,30 @@
+citizen_node_endpoint: 'localhost:9000'
+
+aggregator_endpoint: 'localhost:5500'
+provider_endpoint: 'localhost:5600'
+
+chain_db_dir: ''
+score_db_icondex_dir: ''
+direct_db_access: 0
+transforms:
+  - stake_history
+  - stake_top100
+  - recent_stake_wallets
+  - abstention_stake
+  - funded_wallets
+  - passive_stake_wallets
+  - contract_history
+
+warehouse_dir: '.chainalytic_icon/warehouse'
+
+# E.g. ".chainalytic_icon/warehouse/stake_history_storage"
+transform_storage_dir: '{warehouse_dir}/{transform_id}_storage'
+
+transform_cache_dir: '{warehouse_dir}/{transform_id}_cache'
+
+# 10: DEBUG
+# 20: INFO
+# 30: WARNING
+# 40: ERROR
+# 50: CRITICAL
+log_level: 30
