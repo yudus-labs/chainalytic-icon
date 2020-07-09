@@ -6,8 +6,7 @@ from typing import Any, Collection, Dict, List, Optional, Set, Tuple, Union
 
 import plyvel
 
-from chainalytic_icon.common import config
-from chainalytic_icon.common.util import get_child_logger
+from chainalytic_icon.common import config, util
 
 
 class Storage(object):
@@ -16,8 +15,7 @@ class Storage(object):
 
     Properties:
         working_dir (str):
-        warehouse_dir (str):
-        zone_storage_dir (str):
+        storage_dir (str):
         transform_storage_dirs (dict):
         transform_storage_dbs (dict):
     
@@ -54,12 +52,16 @@ class Storage(object):
         self.working_dir = working_dir
 
         self.config = config.get_config(working_dir)
-        self.warehouse_dir = Path(working_dir, self.config['warehouse_dir']).as_posix()
+        self.storage_dir = (
+            Path(working_dir, self.config['storage_dir'])
+            .as_posix()
+            .format(network_name=self.config['network_name'])
+        )
 
         transforms = self.config['transforms']
         self.transform_storage_dirs = {
             tid: self.config['transform_storage_dir'].format(
-                warehouse_dir=self.warehouse_dir, transform_id=tid
+                storage_dir=self.storage_dir, transform_id=tid
             )
             for tid in transforms
         }
@@ -72,14 +74,14 @@ class Storage(object):
             for tid in transforms
         }
 
-        self.logger = get_child_logger('aggregator.storage')
+        self.logger = util.get_child_logger('aggregator.storage')
 
-    def query(self, api_id: str, api_params: dict) -> Optional[Any]:
+    def call_storage(self, api_id: str, api_params: dict) -> Optional[Any]:
         func = getattr(self, api_id) if hasattr(self, api_id) else None
 
         if func:
             try:
-                return await func(api_params)
+                return func(api_params)
             except Exception as e:
                 self.logger.error(f'{str(e)} \n {traceback.format_exc()}')
                 return None
@@ -87,6 +89,9 @@ class Storage(object):
             self.logger.error(f'Storage API not implemented: {api_id}')
             return None
 
+    # ##################################
+    # Functions to be queried ( api_id )
+    #
     def put_block(self, api_params: dict) -> bool:
         """Put block data to one specific transform storage.
 

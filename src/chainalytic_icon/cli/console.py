@@ -95,12 +95,12 @@ class Console(object):
             '0': {
                 'endpoint': self.aggregator_endpoint,
                 'name': 'Aggregator',
-                'py_pkg': 'chainalytic.aggregator',
+                'py_pkg': 'chainalytic_icon.aggregator',
             },
             '1': {
                 'endpoint': self.provider_endpoint,
                 'name': 'Provider',
-                'py_pkg': 'chainalytic.provider',
+                'py_pkg': 'chainalytic_icon.provider',
             },
         }
         return sid_info
@@ -217,7 +217,7 @@ class Console(object):
                 for tid in all_transform_ids:
                     last_block = provider_client.request(
                         "_call",
-                        call_id='api_call',
+                        call_id='call_api',
                         api_id='last_block_height',
                         api_params={'transform_id': tid},
                     ).data.result['result']

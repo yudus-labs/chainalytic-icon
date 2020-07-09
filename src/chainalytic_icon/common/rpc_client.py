@@ -11,12 +11,11 @@ SUCCEED_STATUS = 1
 FAILED_STATUS = 0
 
 
-async def call_async(endpoint: str, **kwargs) -> Dict:
-    """Use this function to communicate with all Chainalytic services
+async def call_ws(endpoint: str, **kwargs) -> Dict:
+    """Use this function to communicate with Aggregator services
 
     Default service endpoints:
         Aggregator: localhost:5500
-        Provider: localhost:5600
     
     Returns:
         dict: {'status': bool, 'data': Any}
@@ -30,21 +29,21 @@ async def call_async(endpoint: str, **kwargs) -> Dict:
 
 
 def call(endpoint: str, **kwargs) -> Dict:
-    """Use this function to communicate with all Chainalytic services
+    """
+    Synchronous version of `call_ws()`
+    """
+    return asyncio.get_event_loop().run_until_complete(call_ws(endpoint, **kwargs))
 
-    Synchronous version of `call_async()`
+
+def call_aiohttp(endpoint: str, **kwargs) -> Dict:
+    """Use this function to communicate with Provider services
 
     Default service endpoints:
-        Aggregator: localhost:5500
         Provider: localhost:5600
     
     Returns:
         dict: {'status': bool, 'data': Any}
     """
-    return asyncio.get_event_loop().run_until_complete(call_async(endpoint, **kwargs))
-
-
-def call_aiohttp(endpoint: str, **kwargs) -> Dict:
     try:
         client = HTTPClient(f'http://{endpoint}')
         r = client.request("_call", **kwargs)

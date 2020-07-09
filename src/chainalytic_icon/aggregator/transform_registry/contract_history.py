@@ -98,8 +98,8 @@ class Transform(BaseTransform):
 
         return {
             'height': height,
-            'data': {},
-            'misc': {
+            'block_data': {},
+            'latest_state_data': {
                 'updated_contract_state': {'updated_contracts': updated_contracts, 'height': height}
             },
         }

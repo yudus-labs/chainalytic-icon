@@ -1,8 +1,7 @@
 import traceback
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
-from chainalytic_icon.common import config
-from chainalytic_icon.common.util import get_child_logger
+from chainalytic_icon.common import config, util
 
 from . import transform
 
@@ -26,7 +25,7 @@ class Kernel(object):
         self.transforms = {}
         self.storage = storage
         self.config = config.get_config(working_dir)
-        self.logger = get_child_logger('aggregator.kernel')
+        self.logger = util.get_child_logger('aggregator.kernel')
 
         transform_registry = transform.load_transforms(working_dir)
         for transform_id in transform_registry:
@@ -37,13 +36,13 @@ class Kernel(object):
         self.transforms[transform.transform_id] = transform
         transform.set_kernel(self)
 
-    def execute(self, height: int, input_data: Any, transform_id: str) -> Optional[bool]:
+    async def execute(self, height: int, input_data: Any, transform_id: str) -> Optional[bool]:
         """Execute transform and push output data to storage
         """
-        output = None
+        output = r = None
         if transform_id in self.transforms:
             try:
-                output = self.transforms[transform_id].execute(height, input_data)
+                output = await self.transforms[transform_id].execute(height, input_data)
             except Exception as e:
                 self.logger.error(f'ERROR while executing transform {transform_id}')
                 self.logger.error(str(e))
@@ -52,65 +51,71 @@ class Kernel(object):
             return 0
 
         if transform_id == 'stake_history':
-            r = self.storage.put_block(
+            r1 = self.storage.put_block(
                 api_params={
                     'height': output['height'],
-                    'data': output['data'],
+                    'block_data': output['block_data'],
                     'transform_id': transform_id,
                 },
             )
             r2 = self.storage.set_latest_unstake_state(
                 api_params={
-                    'unstake_state': output['misc']['latest_unstake_state'],
+                    'unstake_state': output['latest_state_data']['latest_unstake_state'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status'] and r2['status']
+            r = r1 and r2
+
         elif transform_id == 'stake_top100':
             r = self.storage.set_latest_stake_top100(
                 api_params={
-                    'stake_top100': output['misc']['latest_stake_top100'],
+                    'stake_top100': output['latest_state_data']['latest_stake_top100'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
         elif transform_id == 'recent_stake_wallets':
             r = self.storage.set_recent_stake_wallets(
                 api_params={
-                    'recent_stake_wallets': output['misc']['recent_stake_wallets'],
+                    'recent_stake_wallets': output['latest_state_data']['recent_stake_wallets'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
         elif transform_id == 'abstention_stake':
             r = self.storage.set_abstention_stake(
                 api_params={
-                    'abstention_stake': output['misc']['abstention_stake'],
+                    'abstention_stake': output['latest_state_data']['abstention_stake'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
         elif transform_id == 'funded_wallets':
             r = self.storage.update_funded_wallets(
                 api_params={
-                    'updated_wallets': output['misc']['updated_wallets'],
+                    'updated_wallets': output['latest_state_data']['updated_wallets'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
         elif transform_id == 'passive_stake_wallets':
             r = self.storage.update_passive_stake_wallets(
                 api_params={
-                    'updated_wallets': output['misc']['updated_wallets'],
+                    'updated_wallets': output['latest_state_data']['updated_wallets'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
         elif transform_id == 'contract_history':
             r = self.storage.update_contract_history(
                 api_params={
-                    'updated_contract_state': output['misc']['updated_contract_state'],
+                    'updated_contract_state': output['latest_state_data']['updated_contract_state'],
                     'transform_id': transform_id,
                 },
             )
-            return r['status']
+
+        # Update last block height of corresponding `transform_id`
+        if r:
+            self.storage.set_last_block_height(
+                api_params={'height': output['height'], 'transform_id': transform_id,}
+            )

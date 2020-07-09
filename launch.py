@@ -2,18 +2,15 @@ import argparse
 import sys
 import time
 
-from chainalytic.cli import Console
+from chainalytic_icon.cli import Console
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-z', '--zone-id', default='public-icon', help='Zone ID to init. Default is "public-icon"',
-    )
-    parser.add_argument(
         '-s',
         '--sid',
-        help='Service ID to init. 0: Upstream, 1: Aggregator, 2: Warehouse, 3: Provider',
+        help='Service ID to init. 0: Aggregator, 1: Provider',
     )
     parser.add_argument('-i', '--init-config', action='store_true', help='Generate user config')
     parser.add_argument('--restart', action='store_true', help='Force restart all running services')
@@ -50,7 +47,7 @@ if __name__ == '__main__':
         else:
             console.load_config()
             console.init_services(
-                args.zone_id, service_id=args.sid, force_restart=args.restart,
+                service_id=args.sid, force_restart=args.restart,
             )
             if args.keep_running:
                 while 1:

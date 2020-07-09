@@ -9,19 +9,15 @@ def pretty(d: dict) -> str:
     return json.dumps(d, indent=2, sort_keys=1)
 
 
-def create_logger(logger_name: str, log_location: str = '', level: int = None):
+def create_logger(working_dir: str, logger_name: str, level: int = None):
+    cfg = config.get_config(working_dir)
+
     if not level:
-        level = int(os.environ['LOG_LEVEL']) if 'LOG_LEVEL' in os.environ else logging.WARNING
+        level = cfg['log_level']
     logger = logging.getLogger(logger_name)
     logger.setLevel(level)
 
-    log_path = Path(
-        config.get_working_dir(),
-        config.CHAINALYTIC_FOLDER,
-        'log',
-        log_location,
-        f'{logger_name}.log',
-    )
+    log_path = Path(cfg['log_dir'].format(network_name=cfg['network_name']), f'{logger_name}.log')
     log_path.parent.mkdir(parents=1, exist_ok=1)
 
     fh = logging.FileHandler(log_path.as_posix(), mode='w')

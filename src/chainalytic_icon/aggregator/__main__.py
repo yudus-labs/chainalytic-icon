@@ -2,7 +2,7 @@ import argparse
 import asyncio
 import os
 import sys
-from time import time
+import time
 
 import websockets
 from jsonrpcclient.clients.websockets_client import WebSocketsClient
@@ -31,7 +31,7 @@ async def _call(call_id: str, **kwargs):
         message = '\n'.join(
             [
                 'Pong !',
-                'Kernel service is running',
+                'Aggregator service is running',
                 f'Working dir: {_KERNEL.working_dir}',
                 f'Params: {params}',
             ]
@@ -45,10 +45,10 @@ async def _call(call_id: str, **kwargs):
     elif call_id == 'latest_upstream_block_height':
         return _UPSTREAM.last_block_height()
 
-    elif call_id == 'query_storage':
+    elif call_id == 'call_storage':
         api_id = params['api_id']
         api_params = params['api_params']
-        return _STORAGE.query(api_id, api_params)
+        return _STORAGE.call_storage(api_id, api_params)
 
     else:
         return 'Not implemented'
@@ -76,9 +76,12 @@ async def aggregate_data():
     while 1:
         _LOGGER.info('New aggregation')
 
-        t = time()
+        # A temp hack, without it websocket server won't work, still an unknown reason
+        await asyncio.sleep(0.0001)
+
+        t = time.time()
         for tid in _KERNEL.transforms:
-            t1 = time()
+            t1 = time.time()
             _LOGGER.info(f'Transform ID: {tid}')
             _LOGGER.debug(f'--Trying to fetch data...')
 
@@ -92,16 +95,16 @@ async def aggregate_data():
                     _LOGGER.debug(f'--Fetched data successfully')
                     _LOGGER.debug(f'--Next block height: {next_block_height}')
                     _LOGGER.debug(f'--Preparing to execute next block...')
-                    _KERNEL.execute(
+                    await _KERNEL.execute(
                         height=next_block_height, input_data=block_data, transform_id=tid,
                     )
                     _LOGGER.debug(f'--Executed block {next_block_height} successfully')
 
-            agg_time = round(time() - t1, 4)
+            agg_time = round(time.time() - t1, 4)
             _LOGGER.info(f'--Aggregated block {next_block_height} in {agg_time}s')
 
         _LOGGER.debug('----')
-        tagg_time = round(time() - t, 4)
+        tagg_time = round(time.time() - t, 4)
         _LOGGER.debug(f'Total aggregation time: {tagg_time}s')
         _LOGGER.debug(f'Estimated aggregation speed: {int(1/tagg_time)} blocks/s')
         _LOGGER.info('')
@@ -109,9 +112,11 @@ async def aggregate_data():
 
 
 def _run_server(endpoint, working_dir):
+    global _UPSTREAM
+    global _STORAGE
     global _KERNEL
     global _LOGGER
-    _LOGGER = create_logger('aggregator')
+    _LOGGER = create_logger(working_dir, 'aggregator')
     rpc_server.set_logger(_LOGGER)
 
     _UPSTREAM = upstream.Upstream(working_dir)

@@ -1,9 +1,7 @@
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 import traceback
-from chainalytic_icon.common import config
-from chainalytic_icon.common import util
-from chainalytic_icon.common.util import get_child_logger
-from chainalytic_icon.provider.api_bundle import BaseApiBundle
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+
+from chainalytic_icon.common import config, util
 
 
 class ApiBundle(object):
@@ -16,12 +14,12 @@ class ApiBundle(object):
         self.working_dir = working_dir
         self.collator = None
 
-        self.logger = get_child_logger('provider.api_bundle')
+        self.logger = util.get_child_logger('provider.api_bundle')
 
     def set_collator(self, collator: 'Collator'):
         self.collator = collator
 
-    async def api_call(self, api_id: str, api_params: dict) -> Dict:
+    async def call_api(self, api_id: str, api_params: dict) -> Dict:
         ret = {'status': 0, 'result': None}
         func = getattr(self, api_id) if hasattr(self, api_id) else None
 
@@ -42,6 +40,9 @@ class ApiBundle(object):
 
         return ret
 
+    # #################
+    # APIs to be called
+    #
     async def get_staking_info(self, api_params: dict) -> Optional[dict]:
         if 'height' in api_params:
             return await self.collator.get_block(api_params['height'], 'stake_history')

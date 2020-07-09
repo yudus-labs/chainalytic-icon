@@ -1,4 +1,11 @@
-# chainalytic-icon
-A lite version of `chainalytic-framework` dedicated for ICON blockchain networks
+# Chainalytic ICON
 
-In progress..
+A simpler and more efficient version of `chainalytic-framework` dedicated for ICON blockchain networks.
+
+*Run individual services ( for debugging )*
+
+[source]
+----
+venv/bin/python -m chainalytic_icon.aggregator --endpoint localhost:5500 --working_dir .
+venv/bin/python -m chainalytic_icon.provider --endpoint localhost:5600 --working_dir .
+----

@@ -39,33 +39,21 @@ async def _call(call_id: str, **kwargs):
         _LOGGER.info('Service is terminated')
         sys.exit()
         return EXIT_SERVICE
-    elif call_id == 'api_call':
+
+    elif call_id == 'call_api':
         api_id = params['api_id']
         api_params = params['api_params'] if 'api_params' in params else {}
-        return await _PROVIDER.api_bundle.api_call(api_id, api_params)
+        return await _PROVIDER.api_bundle.call_api(api_id, api_params)
+
     else:
         return f'Not implemented'
 
-
-# websockets transfer protocol
-# def _run_server(endpoint, working_dir, zone_id):
-#     global _PROVIDER
-#     _PROVIDER = Provider(working_dir, zone_id)
-#     _LOGGER.info(f'Provider endpoint: {endpoint}')
-#     _LOGGER.info(f'Provider zone ID: {zone_id}')
-
-#     host = endpoint.split(':')[0]
-#     port = int(endpoint.split(':')[1])
-#     start_server = websockets.serve(main_dispatcher, host, port)
-#     asyncio.get_event_loop().run_until_complete(start_server)
-#     asyncio.get_event_loop().run_forever()
-#     _LOGGER.info('Initialized Provider')
 
 # aiohttp transfer protocol
 def _run_server(endpoint, working_dir):
     global _PROVIDER
     global _LOGGER
-    _LOGGER = create_logger('provider')
+    _LOGGER = create_logger(working_dir, 'provider')
     rpc_server.set_logger(_LOGGER)
 
     _PROVIDER = Provider(working_dir)

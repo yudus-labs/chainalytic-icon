@@ -1,26 +1,24 @@
-citizen_node_endpoint: 'localhost:9000'
+network_name: 'icon_mainnet'
+
+citizen_node_endpoint: 'https://ctz.solidwallet.io'
 
 aggregator_endpoint: 'localhost:5500'
 provider_endpoint: 'localhost:5600'
 
 chain_db_dir: ''
 score_db_icondex_dir: ''
-direct_db_access: 0
+direct_db_access: 1
+
 transforms:
-  - stake_history
-  - stake_top100
-  - recent_stake_wallets
-  - abstention_stake
-  - funded_wallets
-  - passive_stake_wallets
   - contract_history
 
-warehouse_dir: '.chainalytic_icon/warehouse'
+storage_dir: '.chainalytic_icon/{network_name}/db'
 
 # E.g. ".chainalytic_icon/warehouse/stake_history_storage"
-transform_storage_dir: '{warehouse_dir}/{transform_id}_storage'
+transform_storage_dir: '{storage_dir}/{transform_id}_storage'
+transform_cache_dir: '{storage_dir}/{transform_id}_cache'
 
-transform_cache_dir: '{warehouse_dir}/{transform_id}_cache'
+log_dir: '.chainalytic_icon/{network_name}/log'
 
 # 10: DEBUG
 # 20: INFO

@@ -4,8 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 import plyvel
 
-from chainalytic_icon.common import config
-from chainalytic_icon.common.util import get_child_logger
+from chainalytic_icon.common import config, util
 
 
 class BaseTransform(object):
@@ -32,28 +31,36 @@ class BaseTransform(object):
         self.kernel = None
 
         self.config = config.get_config(working_dir)
-        warehouse_dir = Path(working_dir, self.config['warehouse_dir']).as_posix()
+        storage_dir = (
+            Path(working_dir, self.config['storage_dir'])
+            .as_posix()
+            .format(network_name=self.config['network_name'])
+        )
 
         self.transform_storage_dir = self.config['transform_storage_dir'].format(
-            warehouse_dir=warehouse_dir, transform_id=transform_id
+            storage_dir=storage_dir, transform_id=transform_id
         )
         self.transform_cache_dir = self.config['transform_cache_dir'].format(
-            warehouse_dir=warehouse_dir, transform_id=transform_id
+            storage_dir=storage_dir, transform_id=transform_id
         )
 
         Path(self.transform_cache_dir).parent.mkdir(parents=1, exist_ok=1)
         self.transform_cache_db = plyvel.DB(self.transform_cache_dir, create_if_missing=True)
 
-        self.logger = get_child_logger('aggregator.transform')
+        self.logger = util.get_child_logger('aggregator.transform')
 
     def set_kernel(self, kernel: 'Kernel'):
         self.kernel = kernel
 
     async def execute(self, height: int, input_data: Any) -> Dict:
-        return {'height': height, 'data': {}}
+        return {'height': height, 'block_data': {}, 'latest_state_data': {}}
 
 
-def load_transforms(working_dir: str):
+def load_transforms(working_dir: str) -> Dict:
+    """
+    Return a dict of loaded `Transform` modules
+    """
+
     valid_transforms = config.get_config(working_dir)['transforms']
     ret = {}
     cur_dir = Path(__file__).resolve().parent

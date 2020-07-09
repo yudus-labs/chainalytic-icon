@@ -23,9 +23,8 @@ def handle_client_failure(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            url = f"http://{args[0].citizen_node_endpoint}"
-            http_provider = HTTPProvider(url, 3)
-            
+            http_provider = HTTPProvider(args[0].citizen_node_endpoint, 3)
+
             if args[0].direct_db_access:
                 return func(*args, **kwargs)
             elif http_provider.is_connected():
@@ -33,7 +32,9 @@ def handle_client_failure(func):
                     args[0].icon_service = IconService(http_provider)
                 return func(*args, **kwargs)
             else:
-                args[0].logger.warning(f'Citizen node is not connected: {url}')
+                args[0].logger.warning(
+                    f'Citizen node is not connected: {args[0].citizen_node_endpoint}'
+                )
                 return None
 
         except Exception as e:
@@ -63,11 +64,11 @@ class Upstream(object):
     LAST_BLOCK_KEY = b'last_block_key'
 
     def __init__(self, working_dir: str):
-        super(Upstream, self).__init__(working_dir)
+        super(Upstream, self).__init__()
 
         self.working_dir = working_dir
         self.config = config.get_config(working_dir)
-        self.logger = util.get_child_logger('upstream.data_feeder')
+        self.logger = util.get_child_logger('aggregator.upstream')
 
         self.direct_db_access = self.config['direct_db_access']
         self.chain_db_dir = self.config['chain_db_dir'] if self.config else ''
@@ -136,11 +137,8 @@ class Upstream(object):
                 return None
         else:
             try:
-                tx_detail = self.icon_service.get_transaction(tx_hash)
-                if not tx_detail:
-                    return None
-                else:
-                    return tx_detail['result'] if 'result' in tx_detail else None
+                tx_result = self.icon_service.get_transaction_result(tx_hash)
+                return tx_result
 
             except Exception as e:
                 self.logger.error(
@@ -352,22 +350,34 @@ class Upstream(object):
             for tx in txs:
                 if 'to' in tx:
                     if tx['to'].startswith('cx'):
+                        # pprint(tx)
                         tx_data = {
                             'contract_address': tx['to'],
-                            'timestamp': int(tx['timestamp'], 16),
+                            'timestamp': int(tx['timestamp'], 16)
+                            if isinstance(tx['timestamp'], str)
+                            else tx['timestamp'],
                             'hash': tx['txHash'],
                             'from': tx['from'],
-                            'value': int(tx['value'], 16) / 10 ** 18 if 'value' in tx else None,
+                            'value': None,
                             'fee': None,
                             'internal_tx_target': None,
                             'internal_tx_value': None,
                         }
+                        if 'value' in tx:
+                            tx_data['value'] = (
+                                int(tx['value'], 16) / 10 ** 18
+                                if isinstance(tx['value'], str)
+                                else tx['value']
+                            )
 
                         tx_result = self._get_tx_result(tx['txHash'])
+                        # pprint(tx_result)
                         tx_data['fee'] = (
                             int(tx_result['stepPrice'], 16)
-                            * int(tx_result['stepUsed'], 16)
-                            / 10 ** 18
+                            if isinstance(tx_result['stepPrice'], str)
+                            else tx_result['stepPrice'] * int(tx_result['stepUsed'], 16)
+                            if isinstance(tx_result['stepUsed'], str)
+                            else tx_result['stepUsed'] / 10 ** 18
                         )
 
                         for event in tx_result['eventLogs']:
