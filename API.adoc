@@ -1,0 +1,64 @@
+## Provider API
+
+### JSON-RPC requests
+
+#### latest_upstream_block_height
+[code]
+----
+"method": "_call",
+"params": {
+    "call_id": "call_api",
+    "api_id": "latest_upstream_block_height"
+}
+----
+
+#### contract_internal_transaction
+[code]
+----
+"method": "_call",
+"params": {
+    "call_id": "call_api",
+    "api_id": "contract_internal_transaction",
+    "api_params": {
+        "address": "cx....",
+        "size": 100 // Latest 100 txs
+    }
+}
+----
+
+#### contract_transaction
+[code]
+----
+"method": "_call",
+"params": {
+    "call_id": "call_api",
+    "api_id": "contract_transaction",
+    "api_params": {
+        "address": "cx....",
+        "size": 100 // Latest 100 txs
+    }
+}
+----
+
+#### contract_stats
+[code]
+----
+"method": "_call",
+"params": {
+    "call_id": "call_api",
+    "api_id": "contract_stats",
+    "api_params": {
+        "address": "cx...."
+    }
+}
+----
+
+#### contract_list
+[code]
+----
+"method": "_call",
+"params": {
+    "call_id": "call_api",
+    "api_id": "contract_list"
+}
+----
