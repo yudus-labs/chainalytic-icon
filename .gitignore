@@ -111,3 +111,6 @@ _tmp/
 ___*.py
 
 mainnet
+
+provider_result.json
+_tmp.py
