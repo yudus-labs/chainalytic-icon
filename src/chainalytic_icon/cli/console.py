@@ -244,10 +244,30 @@ class Console(object):
             stdscr.addstr(5, 0, f'Latest upstream block:  {latest_block_height:,}')
             stdscr.addstr(6, 0, f'Latest aggregated block of all transforms')
             for i, tid in enumerate(all_transforms_last_block):
+                if (
+                    latest_block_height > all_transforms_last_block[tid] > 0
+                    and all_transforms_speed[tid] > 0
+                ):
+                    remaining_time = seconds_to_datetime(
+                        (latest_block_height - all_transforms_last_block[tid])
+                        / all_transforms_speed[tid]
+                    )
+                elif (
+                    latest_block_height == all_transforms_last_block[tid]
+                    and all_transforms_last_block[tid] > 0
+                ):
+                    remaining_time = 'Fully synced'
+                elif latest_block_height < all_transforms_last_block[tid]:
+                    remaining_time = (
+                        'Upstream block height is lower than latest aggregated block (out-of-date)'
+                    )
+                else:
+                    remaining_time = 'N/A'
+
                 stdscr.addstr(
                     7 + i,
                     0,
-                    f'----{tid}:  {all_transforms_last_block[tid]:,} | {all_transforms_speed[tid]} blocks/s',
+                    f'----{tid}:  {all_transforms_last_block[tid]:,} | {all_transforms_speed[tid]} blocks/s | {remaining_time} remaining',
                 )
 
             stdscr.refresh()

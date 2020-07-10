@@ -47,8 +47,7 @@ class Collator(object):
 
     async def latest_upstream_block_height(self) -> Optional[int]:
         r = await rpc_client.call_ws(
-            self.aggregator_endpoint,
-            call_id='latest_upstream_block_height',
+            self.aggregator_endpoint, call_id='latest_upstream_block_height',
         )
         if r['status'] and r['data']:
             try:
@@ -61,12 +60,12 @@ class Collator(object):
     ####################################
     # For `stake_history` transform only
     #
-    async def latest_unstake_state(self, transform_id: str) -> Optional[dict]:
+    async def latest_unstake_state(self) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='latest_unstake_state',
-            api_params={'transform_id': transform_id},
+            api_params={'transform_id': 'stake_history'},
         )
         if r['status']:
             return r['data']
@@ -78,12 +77,12 @@ class Collator(object):
     ####################################
     # For `stake_top100` transform only
     #
-    async def latest_stake_top100(self, transform_id: str) -> Optional[dict]:
+    async def latest_stake_top100(self) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='latest_stake_top100',
-            api_params={'transform_id': transform_id},
+            api_params={'transform_id': 'stake_top100'},
         )
         if r['status']:
             return r['data']
@@ -95,12 +94,12 @@ class Collator(object):
     ###########################################
     # For `recent_stake_wallets` transform only
     #
-    async def recent_stake_wallets(self, transform_id: str) -> Optional[dict]:
+    async def recent_stake_wallets(self) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='recent_stake_wallets',
-            api_params={'transform_id': transform_id},
+            api_params={'transform_id': 'recent_stake_wallets'},
         )
         if r['status']:
             return r['data']
@@ -112,12 +111,12 @@ class Collator(object):
     #######################################
     # For `abstention_stake` transform only
     #
-    async def abstention_stake(self, transform_id: str) -> Optional[dict]:
+    async def abstention_stake(self) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='abstention_stake',
-            api_params={'transform_id': transform_id},
+            api_params={'transform_id': 'abstention_stake'},
         )
         if r['status']:
             return r['data']
@@ -129,12 +128,12 @@ class Collator(object):
     #####################################
     # For `funded_wallets` transform only
     #
-    async def funded_wallets(self, transform_id: str, min_balance: float) -> Optional[dict]:
+    async def funded_wallets(self, min_balance: float) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='funded_wallets',
-            api_params={'transform_id': transform_id, 'min_balance': min_balance},
+            api_params={'transform_id': 'funded_wallets', 'min_balance': min_balance},
         )
         if r['status']:
             return r['data']
@@ -146,15 +145,13 @@ class Collator(object):
     ############################################
     # For `passive_stake_wallets` transform only
     #
-    async def passive_stake_wallets(
-        self, transform_id: str, max_inactive_duration: int
-    ) -> Optional[dict]:
+    async def passive_stake_wallets(self, max_inactive_duration: int) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='passive_stake_wallets',
             api_params={
-                'transform_id': transform_id,
+                'transform_id': 'passive_stake_wallets',
                 'max_inactive_duration': max_inactive_duration,
             },
         )
@@ -168,14 +165,12 @@ class Collator(object):
     #######################################
     # For `contract_history` transform only
     #
-    async def contract_transaction(
-        self, transform_id: str, address: str, size: int
-    ) -> Optional[dict]:
+    async def contract_transaction(self, address: str, size: int) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='contract_transaction',
-            api_params={'transform_id': transform_id, 'address': address, 'size': size},
+            api_params={'transform_id': 'contract_history', 'address': address, 'size': size},
         )
         if r['status']:
             return r['data']
@@ -184,14 +179,12 @@ class Collator(object):
             self.logger.error(r['data'])
             return None
 
-    async def contract_internal_transaction(
-        self, transform_id: str, address: str, size: int
-    ) -> Optional[dict]:
+    async def contract_internal_transaction(self, address: str, size: int) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='contract_internal_transaction',
-            api_params={'transform_id': transform_id, 'address': address, 'size': size},
+            api_params={'transform_id': 'contract_history', 'address': address, 'size': size},
         )
         if r['status']:
             return r['data']
@@ -200,12 +193,12 @@ class Collator(object):
             self.logger.error(r['data'])
             return None
 
-    async def contract_stats(self, transform_id: str, address: str) -> Optional[dict]:
+    async def contract_stats(self, address: str) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='contract_stats',
-            api_params={'transform_id': transform_id, 'address': address},
+            api_params={'transform_id': 'contract_history', 'address': address},
         )
         if r['status']:
             return r['data']
@@ -214,12 +207,12 @@ class Collator(object):
             self.logger.error(r['data'])
             return None
 
-    async def contract_list(self, transform_id: str) -> Optional[dict]:
+    async def contract_list(self,) -> Optional[dict]:
         r = await rpc_client.call_ws(
             self.aggregator_endpoint,
             call_id='call_storage',
             api_id='contract_list',
-            api_params={'transform_id': transform_id},
+            api_params={'transform_id': 'contract_history'},
         )
         if r['status']:
             return r['data']
@@ -227,4 +220,3 @@ class Collator(object):
             self.logger.error('Failed to request data from Warehouse')
             self.logger.error(r['data'])
             return None
-

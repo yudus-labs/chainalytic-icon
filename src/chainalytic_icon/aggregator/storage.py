@@ -388,12 +388,13 @@ class Storage(object):
             db_batch.put(addr.encode(), json.dumps(updated_contracts[addr]['stats']).encode())
             for i in updated_contracts[addr]['tx']:
                 db_batch.put(
-                    f'{addr}|tx|{i}'.encode(), json.dumps(updated_contracts[addr]['tx']).encode(),
+                    f'{addr}|tx|{i}'.encode(),
+                    json.dumps(updated_contracts[addr]['tx'][i]).encode(),
                 )
             for i in updated_contracts[addr]['internal_tx']:
                 db_batch.put(
                     f'{addr}|internal_tx|{i}'.encode(),
-                    json.dumps(updated_contracts[addr]['tx']).encode(),
+                    json.dumps(updated_contracts[addr]['internal_tx'][i]).encode(),
                 )
 
         db_batch.put(Storage.CONTRACT_LIST_KEY, json.dumps(contract_list).encode())
@@ -423,11 +424,11 @@ class Storage(object):
             return {'transactions': [], 'height': height}
 
         latest_tx_id = stats['tx_count']
-
-        txs = [
-            json.loads(db.get(f'{address}|tx|{i}'.encode()))
-            for i in range(latest_tx_id - size, latest_tx_id + 1)
-        ]
+        txs = []
+        for i in range(latest_tx_id - size, latest_tx_id + 1):
+            tx = db.get(f'{address}|tx|{i}'.encode())
+            if tx:
+                txs.append(json.loads(tx))
 
         return {'transactions': txs, 'height': height}
 
@@ -448,11 +449,11 @@ class Storage(object):
             return {'internal_transaction': [], 'height': height}
 
         latest_tx_id = stats['internal_tx_count']
-
-        txs = [
-            json.loads(db.get(f'{address}|internal_tx|{i}'.encode()))
-            for i in range(latest_tx_id - size, latest_tx_id + 1)
-        ]
+        txs = []
+        for i in range(latest_tx_id - size, latest_tx_id + 1):
+            tx = db.get(f'{address}|internal_tx|{i}'.encode())
+            if tx:
+                txs.append(json.loads(tx))
 
         return {'internal_transaction': txs, 'height': height}
 
