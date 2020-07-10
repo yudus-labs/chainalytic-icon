@@ -4,7 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run Dev",
+            "label": "Run Selected",
             "type": "shell",
             "command": "venv/bin/python ${file}",
             "problemMatcher": [],
@@ -12,6 +12,13 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Call Provider",
+            "type": "shell",
+            "command": "./call_provider",
+            "problemMatcher": [],
+            "group": "build"
         },
         {
             "label": "Run Test",
