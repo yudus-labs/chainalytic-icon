@@ -43,6 +43,9 @@ class ApiBundle(object):
     # #################
     # APIs to be called
     #
+    async def latest_upstream_block_height(self, api_params: dict) -> Optional[int]:
+        return await self.collator.latest_upstream_block_height()
+
     async def get_staking_info(self, api_params: dict) -> Optional[dict]:
         if 'height' in api_params:
             return await self.collator.get_block(api_params['height'], 'stake_history')
