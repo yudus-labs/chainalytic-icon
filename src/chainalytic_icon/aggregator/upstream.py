@@ -360,8 +360,7 @@ class Upstream(object):
                             'from': tx['from'],
                             'value': None,
                             'fee': None,
-                            'internal_tx_target': None,
-                            'internal_tx_value': None,
+                            'internal': [],
                         }
                         if 'value' in tx:
                             tx_data['value'] = (
@@ -388,10 +387,12 @@ class Upstream(object):
 
                         for event in tx_result['eventLogs']:
                             if event['indexed'][0].startswith('ICXTransfer'):
-                                tx_data['internal_tx_target'] = event['indexed'][2]
-                                tx_data['internal_tx_value'] = (
+                                internal = {}
+                                internal['internal_tx_target'] = event['indexed'][2]
+                                internal['internal_tx_value'] = (
                                     int(event['indexed'][3], 16) / 10 ** 18
                                 )
+                                tx_data['internal'].append(internal)
 
                         contract_txs.append(tx_data)
 

@@ -61,22 +61,23 @@ class Transform(BaseTransform):
                 else:
                     updated_contracts[addr]['stats'] = json.loads(updated_contracts[addr]['stats'])
 
-            if tx['internal_tx_target']:
-                updated_contracts[addr]['stats']['internal_tx_count'] += 1
-                next_tx_id = updated_contracts[addr]['stats']['internal_tx_count']
-                updated_contracts[addr]['internal_tx'][f'{next_tx_id}'] = {
-                    'height': height,
-                    'timestamp': tx['timestamp'],
-                    'hash': tx['hash'],
-                    'value': tx['value'],
-                    'fee': tx['fee'],
-                    'internal_tx_target': tx['internal_tx_target'],
-                    'internal_tx_value': tx['internal_tx_value'],
-                }
-                if tx['internal_tx_value']:
-                    updated_contracts[addr]['stats']['internal_tx_volume'] += tx[
-                        'internal_tx_value'
-                    ]
+            if tx['internal']:
+                for internal in tx['internal']:
+                    updated_contracts[addr]['stats']['internal_tx_count'] += 1
+                    next_tx_id = updated_contracts[addr]['stats']['internal_tx_count']
+                    updated_contracts[addr]['internal_tx'][f'{next_tx_id}'] = {
+                        'height': height,
+                        'timestamp': tx['timestamp'],
+                        'hash': tx['hash'],
+                        'value': tx['value'],
+                        'fee': tx['fee'],
+                        'internal_tx_target': internal['internal_tx_target'],
+                        'internal_tx_value': internal['internal_tx_value'],
+                    }
+                    if internal['internal_tx_value']:
+                        updated_contracts[addr]['stats']['internal_tx_volume'] += internal[
+                            'internal_tx_value'
+                        ]
             else:
                 updated_contracts[addr]['stats']['tx_count'] += 1
                 next_tx_id = updated_contracts[addr]['stats']['tx_count']
