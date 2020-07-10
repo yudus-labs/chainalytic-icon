@@ -1,0 +1,1 @@
+curl -X POST -H 'Content-Type: application/json' -d @call_provider.json localhost:5600 > provider_result.json
