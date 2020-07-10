@@ -1,12 +1,13 @@
 {
-    "jsonrpc": "2.0",
-    "id": "id",
-    "method": "_call",
-    "params": {
-        "call_id": "call_api",
-        "api_id": "contract_stats",
-        "api_params": {
-            "address": "cx7525d37107513415796e81326fc26a477721ab8c"
-        }
+  "jsonrpc": "2.0",
+  "id": "id",
+  "method": "_call",
+  "params": {
+    "call_id": "call_api",
+    "api_id": "contract_internal_transaction",
+    "api_params": {
+      "address": "cx7525d37107513415796e81326fc26a477721ab8c",
+      "size": 100
     }
+  }
 }
