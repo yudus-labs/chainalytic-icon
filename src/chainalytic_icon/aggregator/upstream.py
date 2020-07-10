@@ -365,19 +365,25 @@ class Upstream(object):
                         }
                         if 'value' in tx:
                             tx_data['value'] = (
-                                int(tx['value'], 16) / 10 ** 18
+                                int(tx['value'], 16)
                                 if isinstance(tx['value'], str)
                                 else tx['value']
-                            )
+                            ) / 10 ** 18
 
                         tx_result = self._get_tx_result(tx['txHash'])
                         # pprint(tx_result)
                         tx_data['fee'] = (
-                            int(tx_result['stepPrice'], 16)
-                            if isinstance(tx_result['stepPrice'], str)
-                            else tx_result['stepPrice'] * int(tx_result['stepUsed'], 16)
-                            if isinstance(tx_result['stepUsed'], str)
-                            else tx_result['stepUsed'] / 10 ** 18
+                            (
+                                int(tx_result['stepPrice'], 16)
+                                if isinstance(tx_result['stepPrice'], str)
+                                else tx_result['stepPrice']
+                            )
+                            * (
+                                int(tx_result['stepUsed'], 16)
+                                if isinstance(tx_result['stepUsed'], str)
+                                else tx_result['stepUsed']
+                            )
+                            / 10 ** 18
                         )
 
                         for event in tx_result['eventLogs']:
