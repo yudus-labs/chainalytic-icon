@@ -1,12 +1,14 @@
 ## Chainalytic ICON
 
-A simpler, better, and more efficient version of `chainalytic-framework` dedicated for ICON blockchain networks.
+A simpler, better, and more efficient version of link:https://github.com/yudus-lab/chainalytic-framework[Chainalytic Framework] dedicated for ICON blockchain networks.
 
-`chainalytic-framework` is now deprecated and should be used only for reference and study. +
-For production, you should go with this `chainalytic-icon`
+NOTE: `Chainalytic Framework` is now deprecated and should be used only for reference and study. +
+For production, you should go with this `Chainalytic ICON`
 
-In layman term, `chainalytic-icon` is the engine for aggregating, transforming, and building new data from blockchain transactions ( also known as `transition functions` ) +
-It runs in form of a "node" ( a bit similar to blockchain node ), with each `data transform` has its own block height and kept in sync with one `upstream` blockchain node belong to some network ( e.g. citizen node )
+In layman term, `Chainalytic ICON` is the engine for aggregating, transforming, and building new data from blockchain transactions ( also known as *transition functions* ) +
+It runs in form of a "node" ( a bit similar to blockchain node ), with each *data transform* has its own database and kept in sync with one *upstream* blockchain node belong to some network ( e.g. citizen node )
+
+Ultimately, anyone can run a *Chainalytic ICON node* for any *loopchain-based* network ( ICON mainnet, testnet, tbears, private chains...) and build new data upon their demand.
 
 Note that, it is neither analytic framework nor platform, its main purpose is data source backend for other applications, include analytic platforms.
 
@@ -53,13 +55,13 @@ venv/bin/python -m chainalytic_icon.aggregator --endpoint localhost:5500 --worki
 venv/bin/python -m chainalytic_icon.provider --endpoint localhost:5600 --working_dir .
 ----
 
-## Production Docker `chainalytic-icon` node
+## Production Docker `Chainalytic-ICON` node
 
 _Just clone `sample_docker_deploy` folder in this repo and edit from there_
 
 ### Step 1
 
-Go to your cloned `sample_docker_deploy` folder which will contain `chainalytic-icon` node database, then edit `docker-compose.yml` like below
+Go to your cloned `sample_docker_deploy` folder which will contain `Chainalytic-ICON` node database, then edit `docker-compose.yml` like below
 
 [source]
 ----
