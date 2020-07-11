@@ -1,0 +1,27 @@
+network_name: 'icon_mainnet'
+
+citizen_node_endpoint: 'https://ctz.solidwallet.io'
+
+aggregator_endpoint: '0.0.0.0:5500'
+provider_endpoint: '0.0.0.0:5600'
+
+chain_db_dir: '/mainnet/.storage/db_CHANGEIP:7100_icon_dex'
+score_db_icondex_dir: '/mainnet/.score_data/db/icon_dex'
+direct_db_access: 1
+
+transforms:
+  - contract_history
+
+storage_dir: '.chainalytic_icon/{network_name}/db'
+
+transform_storage_dir: '{storage_dir}/{transform_id}_storage'
+transform_cache_dir: '{storage_dir}/{transform_id}_cache'
+
+log_dir: '.chainalytic_icon/{network_name}/log'
+
+# 10: DEBUG
+# 20: INFO
+# 30: WARNING
+# 40: ERROR
+# 50: CRITICAL
+log_level: 30
