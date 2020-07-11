@@ -106,7 +106,9 @@ venv.bak/
 
 *.sublime-workspace
 _tmp/
-.chainalytic*/
+db/
+log/
+/.chainalytic_icon
 
 ___*.py
 
