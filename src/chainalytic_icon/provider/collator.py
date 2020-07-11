@@ -70,7 +70,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -87,7 +87,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -104,7 +104,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -121,7 +121,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -138,7 +138,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -158,7 +158,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -175,7 +175,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -189,7 +189,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -203,7 +203,7 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
 
@@ -217,6 +217,6 @@ class Collator(object):
         if r['status']:
             return r['data']
         else:
-            self.logger.error('Failed to request data from Warehouse')
+            self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None

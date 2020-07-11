@@ -49,6 +49,14 @@ async def _call(call_id: str, **kwargs):
         return f'Not implemented'
 
 
+@method
+async def call_api(**kwargs):
+    params = kwargs
+    api_id = params['api_id']
+    api_params = params['api_params'] if 'api_params' in params else {}
+    return await _PROVIDER.api_bundle.call_api(api_id, api_params)
+
+
 # aiohttp transfer protocol
 def _run_server(endpoint, working_dir):
     global _PROVIDER

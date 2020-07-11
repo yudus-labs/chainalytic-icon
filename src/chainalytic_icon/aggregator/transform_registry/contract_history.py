@@ -11,7 +11,7 @@ from chainalytic_icon.aggregator.transform import BaseTransform
 
 
 class Transform(BaseTransform):
-    START_BLOCK_HEIGHT = 19452235
+    START_BLOCK_HEIGHT = 1
 
     CONTRACT_LIST_KEY = b'contract_list'
     TX_KEY = b'tx'
@@ -66,15 +66,16 @@ class Transform(BaseTransform):
                     updated_contracts[addr]['stats']['internal_tx_count'] += 1
                     next_tx_id = updated_contracts[addr]['stats']['internal_tx_count']
                     updated_contracts[addr]['internal_tx'][f'{next_tx_id}'] = {
+                        'status': tx['status'],
                         'height': height,
                         'timestamp': tx['timestamp'],
-                        'hash': tx['hash'],
+                        'hash': tx['hash'] if tx['hash'].startswith('0x') else f"0x{tx['hash']}",
                         'value': tx['value'],
                         'fee': tx['fee'],
                         'internal_tx_target': internal['internal_tx_target'],
                         'internal_tx_value': internal['internal_tx_value'],
                     }
-                    if internal['internal_tx_value']:
+                    if internal['internal_tx_value'] and tx['status']:
                         updated_contracts[addr]['stats']['internal_tx_volume'] += internal[
                             'internal_tx_value'
                         ]
@@ -82,14 +83,15 @@ class Transform(BaseTransform):
                 updated_contracts[addr]['stats']['tx_count'] += 1
                 next_tx_id = updated_contracts[addr]['stats']['tx_count']
                 updated_contracts[addr]['tx'][f'{next_tx_id}'] = {
+                    'status': tx['status'],
                     'height': height,
                     'timestamp': tx['timestamp'],
-                    'hash': tx['hash'],
+                    'hash': tx['hash'] if tx['hash'].startswith('0x') else f"0x{tx['hash']}",
                     'from': tx['from'],
                     'value': tx['value'],
                     'fee': tx['fee'],
                 }
-                if tx['value']:
+                if tx['value'] and tx['status']:
                     updated_contracts[addr]['stats']['tx_volume'] += tx['value']
 
             cache_db_batch.put(addr.encode(), json.dumps(updated_contracts[addr]['stats']).encode())

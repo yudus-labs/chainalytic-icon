@@ -21,7 +21,7 @@ D = 'DISCONNECTED'
 def seconds_to_datetime(seconds: int):
     sec = timedelta(seconds=seconds)
     d = datetime(1, 1, 1) + sec
-    return f'{d.day - 1}d {d.hour}h {d.minute}m {d.second}s'
+    return f'{d.day - 1}d {d.hour}h {d.minute}m {d.second}s remaining'
 
 
 def handle_curses_break(func):
@@ -216,10 +216,7 @@ class Console(object):
 
                 for tid in all_transform_ids:
                     last_block = provider_client.request(
-                        "_call",
-                        call_id='call_api',
-                        api_id='last_block_height',
-                        api_params={'transform_id': tid},
+                        "call_api", api_id='last_block_height', api_params={'transform_id': tid}
                     ).data.result['result']
                     if last_block:
                         all_transforms_prev_last_block[tid] = all_transforms_last_block[tid]
@@ -267,7 +264,7 @@ class Console(object):
                 stdscr.addstr(
                     7 + i,
                     0,
-                    f'----{tid}:  {all_transforms_last_block[tid]:,} | {all_transforms_speed[tid]} blocks/s | {remaining_time} remaining',
+                    f'----{tid}:  {all_transforms_last_block[tid]:,} | {all_transforms_speed[tid]} blocks/s | {remaining_time}',
                 )
 
             stdscr.refresh()

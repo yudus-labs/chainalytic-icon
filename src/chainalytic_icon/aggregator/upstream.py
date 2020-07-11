@@ -15,9 +15,6 @@ from chainalytic_icon.common import config, util
 BLOCK_HEIGHT_KEY = b'block_height_key'
 BLOCK_HEIGHT_BYTES_LEN = 12
 
-V3_BLOCK_HEIGHT = 10324749
-V4_BLOCK_HEIGHT = 12640761
-
 
 def handle_client_failure(func):
     @functools.wraps(func)
@@ -151,6 +148,23 @@ class Upstream(object):
     def _icon_service_get_last_block(self):
         return self.icon_service.get_block('latest')['height']
 
+    def _parse_block(self, block: dict) -> tuple:
+        txs = (
+            block['confirmed_transaction_list']
+            if 'confirmed_transaction_list' in block
+            else block['transactions']
+        )
+        if 'timestamp' in block:
+            timestamp = (
+                int(block['timestamp'], 16)
+                if isinstance(block['timestamp'], str)
+                else block['timestamp']
+            )
+        else:
+            timestamp = block['time_stamp']
+
+        return (txs, timestamp)
+
     def _get_block_fund_transfer_tx(self, height: int) -> Optional[dict]:
         """Filter out and process ICX transfering txs."""
         self.logger.debug(f'Feeding block: {height}')
@@ -163,13 +177,7 @@ class Upstream(object):
             return -1
 
         try:
-            if height < V3_BLOCK_HEIGHT or not self.direct_db_access:
-                txs = block['confirmed_transaction_list']
-                timestamp = block['time_stamp']
-            else:
-                txs = block['transactions']
-                timestamp = int(block['timestamp'], 16)
-
+            txs, timestamp = self._parse_block(block)
         except Exception as e:
             self.logger.error('ERROR in block data loading, skipped feeding')
             self.logger.error(e)
@@ -220,13 +228,7 @@ class Upstream(object):
             return -1
 
         try:
-            if height < V3_BLOCK_HEIGHT or not self.direct_db_access:
-                txs = block['confirmed_transaction_list']
-                timestamp = block['time_stamp']
-            else:
-                txs = block['transactions']
-                timestamp = int(block['timestamp'], 16)
-
+            txs, timestamp = self._parse_block(block)
         except Exception as e:
             self.logger.error('ERROR in block data loading, skipped feeding')
             self.logger.error(e)
@@ -272,13 +274,7 @@ class Upstream(object):
             return -1
 
         try:
-            if height < V3_BLOCK_HEIGHT or not self.direct_db_access:
-                txs = block['confirmed_transaction_list']
-                timestamp = block['time_stamp']
-            else:
-                txs = block['transactions']
-                timestamp = int(block['timestamp'], 16)
-
+            txs, timestamp = self._parse_block(block)
         except Exception as e:
             self.logger.error('ERROR in block data loading, skipped feeding')
             self.logger.error(e)
@@ -332,13 +328,7 @@ class Upstream(object):
             return -1
 
         try:
-            if height < V3_BLOCK_HEIGHT or not self.direct_db_access:
-                txs = block['confirmed_transaction_list']
-                timestamp = block['time_stamp']
-            else:
-                txs = block['transactions']
-                timestamp = int(block['timestamp'], 16)
-
+            txs, timestamp = self._parse_block(block)
         except Exception as e:
             self.logger.error('ERROR in block data loading, skipped feeding')
             self.logger.error(e)
@@ -352,6 +342,7 @@ class Upstream(object):
                     if tx['to'].startswith('cx'):
                         # pprint(tx)
                         tx_data = {
+                            'status': None,
                             'contract_address': tx['to'],
                             'timestamp': int(tx['timestamp'], 16)
                             if isinstance(tx['timestamp'], str)
@@ -383,6 +374,12 @@ class Upstream(object):
                                 else tx_result['stepUsed']
                             )
                             / 10 ** 18
+                        )
+
+                        tx_data['status'] = (
+                            int(tx_result['status'], 16)
+                            if isinstance(tx_result['status'], str)
+                            else tx_result['status']
                         )
 
                         for event in tx_result['eventLogs']:
