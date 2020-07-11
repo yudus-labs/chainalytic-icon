@@ -4,10 +4,9 @@ services:
     build: .
     image: duyyudus/chainalytic-icon
     container_name: chainalytic-icon
-    network_mode: host
     volumes:
       - /path/to/data/mainnet:/mainnet
-      - .chainalytic_icon/cfg:/chainalytic_icon/cfg
-      - .chainalytic_icon/network_name:/chainalytic_icon/network_name
+      - ./.chainalytic_icon:/chainalytic_icon/.chainalytic_icon
     ports:
+      - 5500:5500
       - 5600:5600

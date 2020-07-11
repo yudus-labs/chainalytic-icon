@@ -1,28 +1,16 @@
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-ENV PATH /opt/conda/bin:$PATH
+RUN apt update
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+RUN apt install -y python3 python3-pip libsecp256k1-dev libleveldb-dev pkg-config build-essential && apt clean
 
-RUN apt update --fix-missing && \
-    apt install -y wget bzip2 ca-certificates && \
-    apt install -y libsecp256k1-dev libleveldb-dev pkg-config build-essential && \
-    apt clean
-
-RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
-    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
-    rm ~/miniconda.sh && \
-    /opt/conda/bin/conda clean -tipsy && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc
-
-RUN mkdir chainalytic
-WORKDIR /chainalytic
+RUN mkdir chainalytic_icon
+WORKDIR /chainalytic_icon
 COPY src src
 COPY launch.py launch.py
-COPY MANIFEST.in MANIFEST.in
 COPY README.adoc README.adoc
 COPY setup.py setup.py
 
-RUN python -m pip install -e .
+RUN /usr/bin/python3 -m pip install -e .
 
-ENTRYPOINT /opt/conda/bin/python launch.py --keep-running
+ENTRYPOINT /usr/bin/python3 launch.py --keep-running
