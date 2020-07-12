@@ -50,23 +50,31 @@ class Console(object):
         cfg (dict):
         aggregator_endpoint (str):
         provider_endpoint (str):
-        is_endpoint_set (bool):
 
     Methods:
+        check_endpoint()
         stop_services()
         init_services()
         monitor()
 
     """
 
-    def __init__(self, working_dir: Optional[str] = None):
+    def __init__(
+        self, aggregator_endpoint: str, provider_endpoint: str, working_dir: Optional[str] = None
+    ):
         super(Console, self).__init__()
         print('Starting Chainalytic Console...')
 
         self.working_dir = working_dir if working_dir else os.getcwd()
-        self.cfg = None
-        self.aggregator_endpoint = None
-        self.provider_endpoint = None
+
+        cfg = config.get_config(self.working_dir)
+
+        self.aggregator_endpoint = (
+            aggregator_endpoint if aggregator_endpoint else cfg['aggregator_endpoint']
+        )
+        self.provider_endpoint = (
+            provider_endpoint if provider_endpoint else cfg['provider_endpoint']
+        )
 
     def init_config(self):
         """Load user config ( and generate it if not found )"""
@@ -77,17 +85,9 @@ class Console(object):
         print('Generated user config')
         print(f'--Config file: {cfg}')
 
-    def load_config(self):
-        if not config.check_user_config(self.working_dir):
-            raise Exception('User config not found, please init config first')
-
-        config.set_working_dir(self.working_dir)
-        self.aggregator_endpoint = config.get_config()['aggregator_endpoint']
-        self.provider_endpoint = config.get_config()['provider_endpoint']
-
-    @property
-    def is_endpoint_set(self) -> bool:
-        return self.aggregator_endpoint and self.provider_endpoint
+    def check_endpoint(self):
+        assert self.aggregator_endpoint, 'Aggregator endpoint is not set'
+        assert self.provider_endpoint, 'Provider endpoint is not set'
 
     @property
     def sid(self):
@@ -105,18 +105,13 @@ class Console(object):
         }
         return sid_info
 
-    def stop_services(self, service_id: Optional[str] = None):
-        assert self.is_endpoint_set, 'Service endpoints are not set, please load config first'
+    def stop_services(self):
+        self.check_endpoint()
 
         print('Stopping services...')
         cleaned = 0
 
-        if service_id:
-            all_sid = [service_id] if service_id in self.sid else []
-        else:
-            all_sid = self.sid
-
-        for i in all_sid:
+        for i in self.sid:
             if i == '1':
                 r = rpc_client.call_aiohttp(self.sid[i]['endpoint'], call_id='ping')
                 if r['status']:
@@ -133,12 +128,9 @@ class Console(object):
         print('Stopped all Chainalytic services' if cleaned else 'Nothing to stop')
 
     def init_services(
-        self,
-        service_id: Optional[str] = None,
-        force_restart: Optional[bool] = 0,
-        always_ping: bool = True,
+        self, force_restart: Optional[bool] = 0, always_ping: bool = True,
     ):
-        assert self.is_endpoint_set, 'Service endpoints are not set, please load config first'
+        self.check_endpoint()
 
         if force_restart:
             self.stop_services()
@@ -147,17 +139,10 @@ class Console(object):
         print('')
         python_exe = sys.executable
 
-        if service_id:
-            all_sid = [service_id] if service_id in self.sid else []
-            if not all_sid:
-                raise Exception('Invalid service ID')
-        else:
-            all_sid = self.sid
-
         sudo = ['sudo', '-S'] if 'SUDO_PWD' in os.environ else []
         echo_pwd = ['echo', os.environ['SUDO_PWD']] if 'SUDO_PWD' in os.environ else []
 
-        for i in all_sid:
+        for i in self.sid:
             if i == '1' and always_ping:
                 pong = rpc_client.call_aiohttp(self.sid[i]['endpoint'], call_id='ping')['status']
             elif always_ping:
@@ -185,7 +170,7 @@ class Console(object):
                 print(f'----Started {self.sid[i]["name"]} service: {" ".join(cmd)}')
                 print('')
 
-        if not all_sid:
+        if not self.sid:
             print('No service initialized')
         print('')
 
@@ -272,13 +257,13 @@ class Console(object):
             time.sleep(refresh_time)
 
     def monitor(self, transform_id: Optional[str], refresh_time: float = 1.0):
-        assert self.is_endpoint_set, 'Service endpoints are not set, please load config first'
+        self.check_endpoint()
 
-        print('Starting aggregation monitor, waiting for Provider and Aggregator service...')
+        print('Console Monitor is waiting for Provider and Aggregator service...')
         r1 = rpc_client.call_aiohttp(self.provider_endpoint, call_id='ping')['status']
         r2 = rpc_client.call(self.aggregator_endpoint, call_id='ping')['status']
         while not (r1 and r2):
-            time.sleep(0.1)
+            time.sleep(1)
             r1 = rpc_client.call_aiohttp(self.provider_endpoint, call_id='ping')['status']
             r2 = rpc_client.call(self.aggregator_endpoint, call_id='ping')['status']
 

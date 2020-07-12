@@ -11,29 +11,18 @@ from chainalytic_icon.aggregator.transform import BaseTransform
 
 
 class Transform(BaseTransform):
-    START_BLOCK_HEIGHT = 1
-
-    CONTRACT_LIST_KEY = b'contract_list'
-    TX_KEY = b'tx'
-    INTERNAL_TX_KEY = b'internal_tx'
-    LAST_STATE_HEIGHT_KEY = b'last_state_height'
+    START_BLOCK_HEIGHT = 1  # This is used in Aggregator service initialization
 
     def __init__(self, working_dir: str, transform_id: str):
         super(Transform, self).__init__(working_dir, transform_id)
 
     async def execute(self, height: int, input_data: dict) -> Optional[Dict]:
-        start_time = time.time()
 
-        # Load transform cache to retrive previous staking state
         cache_db = self.transform_cache_db
         cache_db_batch = self.transform_cache_db.write_batch()
 
-        # Make sure input block data represents for the next block of previous state cache
-        prev_state_height = cache_db.get(Transform.LAST_STATE_HEIGHT_KEY)
-        if prev_state_height:
-            prev_state_height = int(prev_state_height)
-            if prev_state_height != height - 1:
-                return None
+        if not self.ensure_block_height_match(height):
+            return self.load_last_output()
 
         # #################################################
 
@@ -99,10 +88,14 @@ class Transform(BaseTransform):
         cache_db_batch.put(Transform.LAST_STATE_HEIGHT_KEY, str(height).encode())
         cache_db_batch.write()
 
-        return {
+        output = {
             'height': height,
             'block_data': {},
             'latest_state_data': {
                 'updated_contract_state': {'updated_contracts': updated_contracts, 'height': height}
             },
         }
+
+        self.save_last_output(output)
+
+        return output

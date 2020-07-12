@@ -45,9 +45,9 @@ def handle_client_failure(func):
 
 def handle_unknown_failure(func):
     @functools.wraps(func)
-    def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs):
         try:
-            return func(*args, **kwargs)
+            return await func(*args, **kwargs)
         except Exception as e:
             args[0].logger.error(f'handle_unknown_failure(): There is error while calling: {func}')
             args[0].logger.error(str(e))
@@ -406,7 +406,7 @@ class Upstream(object):
         }
 
     @handle_unknown_failure
-    def get_block(self, height: int, transform_id: str) -> Optional[dict]:
+    async def get_block(self, height: int, transform_id: str) -> Optional[dict]:
         if transform_id == 'stake_history':
             return self._get_block_stake_tx(height)
         elif transform_id == 'stake_top100':
@@ -423,7 +423,7 @@ class Upstream(object):
             return self._get_block_contract_tx(height)
 
     @handle_unknown_failure
-    def last_block_height(self) -> Optional[int]:
+    async def last_block_height(self) -> Optional[int]:
         """Get last block height from chain
         """
 

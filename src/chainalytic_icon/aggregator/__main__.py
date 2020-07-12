@@ -43,12 +43,12 @@ async def _call(call_id: str, **kwargs):
         return list(_KERNEL.transforms)
 
     elif call_id == 'latest_upstream_block_height':
-        return _UPSTREAM.last_block_height()
+        return await _UPSTREAM.last_block_height()
 
     elif call_id == 'call_storage':
         api_id = params['api_id']
         api_params = params['api_params']
-        return _STORAGE.call_storage(api_id, api_params)
+        return await _STORAGE.call_storage(api_id, api_params)
 
     else:
         return 'Not implemented'
@@ -77,7 +77,12 @@ async def aggregate_data():
         _LOGGER.info('New aggregation')
 
         # A temp hack, without it websocket server won't work, still an unknown reason
-        await asyncio.sleep(0.0001)
+        if _UPSTREAM.direct_db_access:
+            await asyncio.sleep(0.0001)
+
+        # A temp hack, for better coroutine scheduling
+        else:
+            await asyncio.sleep(0.1)
 
         t = time.time()
         for tid in _KERNEL.transforms:
@@ -90,7 +95,7 @@ async def aggregate_data():
 
             if type(last_block_height) == int:
                 next_block_height = last_block_height + 1
-                block_data = _UPSTREAM.get_block(height=next_block_height, transform_id=tid,)
+                block_data = await _UPSTREAM.get_block(height=next_block_height, transform_id=tid,)
                 if block_data:
                     _LOGGER.debug(f'--Fetched data successfully')
                     _LOGGER.debug(f'--Next block height: {next_block_height}')

@@ -76,7 +76,7 @@ class Storage(object):
 
         self.logger = util.get_child_logger('aggregator.storage')
 
-    def call_storage(self, api_id: str, api_params: dict) -> Optional[Any]:
+    async def call_storage(self, api_id: str, api_params: dict) -> Optional[Any]:
         func = getattr(self, api_id) if hasattr(self, api_id) else None
 
         if func:
@@ -89,8 +89,8 @@ class Storage(object):
             self.logger.error(f'Storage API not implemented: {api_id}')
             return None
 
-    # ##################################
-    # Functions to be queried ( api_id )
+    # ###################################################
+    # Functions to be called by `self.call_storage`
     #
     def put_block(self, api_params: dict) -> bool:
         """Put block data to one specific transform storage.

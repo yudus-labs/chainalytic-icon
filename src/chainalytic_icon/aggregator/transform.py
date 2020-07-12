@@ -1,5 +1,6 @@
-from pathlib import Path
 import importlib
+import json
+from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 import plyvel
@@ -21,8 +22,15 @@ class BaseTransform(object):
 
     Methods:
         execute(height: int, input_data: Dict) -> Dict
+        set_kernel(kernel: 'Kernel')
+        save_last_output(output: dict)
+        load_last_output() -> Optional[Dict]
+        ensure_block_height_match(input_height) -> Optional[Dict]
 
     """
+
+    LAST_OUTPUT_KEY = b'last_output'
+    LAST_STATE_HEIGHT_KEY = b'last_state_height'
 
     def __init__(self, working_dir: str, transform_id: str):
         super(BaseTransform, self).__init__()
@@ -52,7 +60,43 @@ class BaseTransform(object):
     def set_kernel(self, kernel: 'Kernel'):
         self.kernel = kernel
 
+    def save_last_output(self, output: dict):
+        self.transform_cache_db.put(BaseTransform.LAST_OUTPUT_KEY, json.dumps(output).encode())
+
+    def load_last_output(self) -> Optional[Dict]:
+        output = self.transform_cache_db.get(BaseTransform.LAST_OUTPUT_KEY)
+        if output:
+            return json.loads(output)
+
+    def ensure_block_height_match(self, input_height) -> Optional[Dict]:
+        """Make sure input block data represents for the next block of previous state cache."""
+
+        prev_state_height = self.transform_cache_db.get(BaseTransform.LAST_STATE_HEIGHT_KEY)
+        if prev_state_height:
+            prev_state_height = int(prev_state_height)
+            if prev_state_height != input_height - 1:
+                self.logger.warning(
+                    f'Skipped executing transform {self.transform_id} due to mismatch in Transform cache DB and Storage'
+                )
+                self.logger.warning(
+                    f'----Cache DB height: {prev_state_height}, Storage DB height: {input_height}'
+                )
+                self.logger.warning('Returned output of the last execution')
+                return 0
+            else:
+                return 1
+        else:
+            return 1
+
     async def execute(self, height: int, input_data: Any) -> Dict:
+        # All derived classes from BaseTransform must always have following statements
+        #
+        cache_db = self.transform_cache_db
+        cache_db_batch = self.transform_cache_db.write_batch()
+
+        if not self.ensure_block_height_match(height):
+            return self.load_last_output()
+
         return {'height': height, 'block_data': {}, 'latest_state_data': {}}
 
 
