@@ -8,9 +8,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '-s',
-        '--sid',
-        help='Service ID to init. 0: Aggregator, 1: Provider',
+        '-a', '--aggregator', help='Aggregator endpoint',
+    )
+    parser.add_argument(
+        '-p', '--provider', help='Provider endpoint',
     )
     parser.add_argument('-i', '--init-config', action='store_true', help='Generate user config')
     parser.add_argument('--restart', action='store_true', help='Force restart all running services')
@@ -18,9 +19,7 @@ if __name__ == '__main__':
 
     subparsers = parser.add_subparsers(dest='command', help='Sub commands')
     stop_parser = subparsers.add_parser('stop', help='Kill running Chainalytic services')
-    stop_parser.add_argument(
-        'sid', nargs='?', default=None, help='Service ID, kill specific service'
-    )
+
     monitor_parser = subparsers.add_parser('m', help='Monitor all or some specific transform')
     monitor_parser.add_argument(
         'transform_id',
@@ -28,27 +27,24 @@ if __name__ == '__main__':
         default=None,
         help='Transform ID. Skip to monitor all transforms',
     )
-    monitor_parser.add_argument('-r', '--refresh-time', help='Refresh time of aggregation monitor')
+    monitor_parser.add_argument(
+        '-r', '--refresh-time', default='1', help='Refresh time of aggregation monitor'
+    )
 
     args = parser.parse_args()
-    console = Console()
+    console = Console(aggregator_endpoint=args.aggregator, provider_endpoint=args.provider)
 
     try:
         if args.command == 'stop':
-            console.load_config()
-            console.stop_services(args.sid)
+            console.stop_services()
         elif args.command == 'm':
-            console.load_config()
             console.monitor(
-                args.transform_id, float(args.refresh_time) if args.refresh_time else 1,
+                args.transform_id, float(args.refresh_time),
             )
         elif args.init_config:
             console.init_config()
         else:
-            console.load_config()
-            console.init_services(
-                service_id=args.sid, force_restart=args.restart,
-            )
+            console.init_services(force_restart=args.restart)
             if args.keep_running:
                 while 1:
                     time.sleep(999)
