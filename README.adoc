@@ -5,8 +5,13 @@ A simpler, better, and more efficient version of link:https://github.com/yudus-l
 NOTE: `Chainalytic Framework` is now deprecated and should be used only for reference and study. +
 For production, you should go with this `Chainalytic ICON`
 
-In layman term, `Chainalytic ICON` is the engine for aggregating, transforming, and building new data from blockchain transactions ( also known as *transition functions* ) +
-It runs in form of a "node" ( a bit similar to blockchain node ), with each *data transform* has its own database and kept in sync with one *upstream* blockchain node belong to some network ( e.g. citizen node )
+`Chainalytic ICON` is the engine for aggregating, transforming, and building new data from blockchain transactions ( also known as *transition functions* ) +
+It runs in form of a "node" ( a bit similar to blockchain node ) and be composed of `Aggregator` and `Provider` service, in which
+
+- Each *data transform* has its own database and kept in sync with one *upstream* blockchain node belong to some network ( e.g. citizen node ) +
+- Provides an async JSON-RPC API for other applications to consume data.
+
+Currently, there is only one built-in data transform `contract_history`. I will gradually port transforms from legacy `Chainalytic Framework` in the future.
 
 Ultimately, anyone can run a *Chainalytic ICON node* for any *loopchain-based* network ( ICON mainnet, testnet, tbears, private chains...) and build new data upon their demand.
 
@@ -25,27 +30,44 @@ sudo apt update
 sudo apt install python3-pip libsecp256k1-dev libleveldb-dev pkg-config build-essential
 ----
 
+### Install `chainalytic-icon` package
+
+[source]
+----
+python3 -m venv venv
+venv/bin/pip install -e .
+----
+
 ### Init config
 [source]
 ----
 ./launch -i
 ----
 
-### Start data build process
+### Start data aggregation process
+
+_Endpoint info will be loaded from `config.yml` if missing_
+
 [source]
 ----
-./launch
+./launch -a localhost:5500 -p localhost:5600
 ----
 
 ### Run monitor
 [source]
 ----
-./launch m
+./launch -a localhost:5500 -p localhost:5600 m
 ----
 
 _Console monitoring looks like this_
 
 image::docs/console.png[]
+
+### Stop
+[source]
+----
+./launch -a localhost:5500 -p localhost:5600 stop
+----
 
 ### Run individual services ( for debugging )
 
@@ -80,7 +102,7 @@ services:
 
 ### Step 2
 
-Edit `.chainalytic_icon/cfg/config.yml` content, usually just need to edit `citizen_node_endpoint` and `direct_db_access`
+Edit `.chainalytic_icon/cfg/config.yml` content, usually just need to edit `network_name`, `citizen_node_endpoint` and `direct_db_access`
 
 [source]
 ----
