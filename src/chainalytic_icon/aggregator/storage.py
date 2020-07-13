@@ -375,6 +375,8 @@ class Storage(object):
         db = self.transform_storage_dbs[transform_id]
         db_batch = self.transform_storage_dbs[transform_id].write_batch()
 
+        max_tx = self.config['transform_config']['contract_history']['max_tx_per_contract']
+
         contract_list = db.get(Storage.CONTRACT_LIST_KEY)
         if contract_list:
             contract_list = json.loads(contract_list)
@@ -385,16 +387,37 @@ class Storage(object):
             if addr not in contract_list:
                 contract_list.append(addr)
 
+            prev_stats = db.get(addr.encode())
+
+            prev_tx_count = json.loads(prev_stats)['tx_count'] if prev_stats else 0
+            cur_tx_count = updated_contracts[addr]['stats']['tx_count']
+            num_of_new_tx = cur_tx_count - prev_tx_count
+            prev_itx_count = json.loads(prev_stats)['itx_count'] if prev_stats else 0
+            cur_itx_count = updated_contracts[addr]['stats']['itx_count']
+            num_of_new_itx = cur_itx_count - prev_itx_count
+
+            if max_tx:
+                if num_of_new_tx:
+                    for i in range(
+                        cur_tx_count - max_tx - num_of_new_tx + 1, cur_tx_count - max_tx + 1
+                    ):
+                        db_batch.delete(f'{addr}|tx|{i}'.encode())
+                if num_of_new_itx:
+                    for i in range(
+                        cur_itx_count - max_tx - num_of_new_itx + 1, cur_itx_count - max_tx + 1
+                    ):
+                        db_batch.delete(f'{addr}|itx|{i}'.encode())
+
             db_batch.put(addr.encode(), json.dumps(updated_contracts[addr]['stats']).encode())
             for i in updated_contracts[addr]['tx']:
                 db_batch.put(
                     f'{addr}|tx|{i}'.encode(),
                     json.dumps(updated_contracts[addr]['tx'][i]).encode(),
                 )
-            for i in updated_contracts[addr]['internal_tx']:
+            for i in updated_contracts[addr]['itx']:
                 db_batch.put(
-                    f'{addr}|internal_tx|{i}'.encode(),
-                    json.dumps(updated_contracts[addr]['internal_tx'][i]).encode(),
+                    f'{addr}|itx|{i}'.encode(),
+                    json.dumps(updated_contracts[addr]['itx'][i]).encode(),
                 )
 
         db_batch.put(Storage.CONTRACT_LIST_KEY, json.dumps(contract_list).encode())
@@ -446,16 +469,16 @@ class Storage(object):
         if stats:
             stats = json.loads(stats)
         else:
-            return {'internal_transaction': [], 'height': height}
+            return {'transaction': [], 'height': height}
 
-        latest_tx_id = stats['internal_tx_count']
+        latest_tx_id = stats['itx_count']
         txs = []
         for i in range(latest_tx_id - size, latest_tx_id + 1):
-            tx = db.get(f'{address}|internal_tx|{i}'.encode())
+            tx = db.get(f'{address}|itx|{i}'.encode())
             if tx:
                 txs.append(json.loads(tx))
 
-        return {'internal_transaction': txs, 'height': height}
+        return {'transaction': txs, 'height': height}
 
     def contract_stats(self, api_params: dict) -> dict:
         address: str = api_params['address']
@@ -484,3 +507,6 @@ class Storage(object):
             'contract_list': json.loads(contract_list) if contract_list else None,
             'height': height,
         }
+
+    def max_tx_per_contract(self, api_params: dict) -> dict:
+        return self.config['transform_config']['contract_history']['max_tx_per_contract']

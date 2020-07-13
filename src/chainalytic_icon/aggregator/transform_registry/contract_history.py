@@ -35,7 +35,7 @@ class Transform(BaseTransform):
                 updated_contracts[addr] = {
                     'stats': {},
                     'tx': {},
-                    'internal_tx': {},
+                    'itx': {},
                 }
 
             if not updated_contracts[addr]['stats']:
@@ -44,29 +44,29 @@ class Transform(BaseTransform):
                     updated_contracts[addr]['stats'] = {
                         'tx_volume': 0,
                         'tx_count': 0,
-                        'internal_tx_volume': 0,
-                        'internal_tx_count': 0,
+                        'itx_volume': 0,
+                        'itx_count': 0,
                     }
                 else:
                     updated_contracts[addr]['stats'] = json.loads(updated_contracts[addr]['stats'])
 
             if tx['internal']:
                 for internal in tx['internal']:
-                    updated_contracts[addr]['stats']['internal_tx_count'] += 1
-                    next_tx_id = updated_contracts[addr]['stats']['internal_tx_count']
-                    updated_contracts[addr]['internal_tx'][f'{next_tx_id}'] = {
+                    updated_contracts[addr]['stats']['itx_count'] += 1
+                    next_tx_id = updated_contracts[addr]['stats']['itx_count']
+                    updated_contracts[addr]['itx'][f'{next_tx_id}'] = {
                         'status': tx['status'],
                         'height': height,
                         'timestamp': tx['timestamp'],
                         'hash': tx['hash'] if tx['hash'].startswith('0x') else f"0x{tx['hash']}",
                         'value': tx['value'],
                         'fee': tx['fee'],
-                        'internal_tx_target': internal['internal_tx_target'],
-                        'internal_tx_value': internal['internal_tx_value'],
+                        'itx_target': internal['itx_target'],
+                        'itx_value': internal['itx_value'],
                     }
-                    if internal['internal_tx_value'] and tx['status']:
-                        updated_contracts[addr]['stats']['internal_tx_volume'] += internal[
-                            'internal_tx_value'
+                    if internal['itx_value'] and tx['status']:
+                        updated_contracts[addr]['stats']['itx_volume'] += internal[
+                            'itx_value'
                         ]
             else:
                 updated_contracts[addr]['stats']['tx_count'] += 1

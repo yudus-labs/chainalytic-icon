@@ -385,8 +385,8 @@ class Upstream(object):
                         for event in tx_result['eventLogs']:
                             if event['indexed'][0].startswith('ICXTransfer'):
                                 internal = {}
-                                internal['internal_tx_target'] = event['indexed'][2]
-                                internal['internal_tx_value'] = (
+                                internal['itx_target'] = event['indexed'][2]
+                                internal['itx_value'] = (
                                     int(event['indexed'][3], 16) / 10 ** 18
                                 )
                                 tx_data['internal'].append(internal)
