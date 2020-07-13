@@ -65,3 +65,6 @@ class ApiBundle(object):
 
     async def contract_list(self, api_params: dict) -> Optional[dict]:
         return await self.collator.contract_list()
+
+    async def max_tx_per_contract(self, api_params: dict) -> Optional[dict]:
+        return await self.collator.max_tx_per_contract()

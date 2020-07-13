@@ -220,3 +220,17 @@ class Collator(object):
             self.logger.error('Failed to request data from Aggregator')
             self.logger.error(r['data'])
             return None
+
+    async def max_tx_per_contract(self,) -> Optional[dict]:
+        r = await rpc_client.call_ws(
+            self.aggregator_endpoint,
+            call_id='call_storage',
+            api_id='max_tx_per_contract',
+            api_params={'transform_id': 'contract_history'},
+        )
+        if r['status']:
+            return r['data']
+        else:
+            self.logger.error('Failed to request data from Aggregator')
+            self.logger.error(r['data'])
+            return None
