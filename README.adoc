@@ -135,6 +135,14 @@ log_dir: '.chainalytic_icon/{network_name}/log'
 # 40: ERROR
 # 50: CRITICAL
 log_level: 30
+
+transform_config:
+  contract_history:
+
+    # For efficient storage, 
+    # number of txs for each contract should be is limited to latest ones
+    # Set to 0 for storing all txs
+    max_tx_per_contract: 1000
 ----
 
 ### Step 3

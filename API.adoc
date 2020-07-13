@@ -57,3 +57,12 @@
     "api_id": "contract_list"
 }
 ----
+
+#### max_tx_per_contract
+[code]
+----
+"method": "call_api",
+"params": {
+    "api_id": "max_tx_per_contract"
+}
+----
