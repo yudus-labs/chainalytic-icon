@@ -72,6 +72,8 @@ class Upstream(object):
         self.score_db_icondex_dir = self.config['score_db_icondex_dir'] if self.config else ''
 
         self.citizen_node_endpoint = self.config['citizen_node_endpoint'] if self.config else ''
+        if not self.citizen_node_endpoint.startswith('http'):
+            self.citizen_node_endpoint = f'http://{self.citizen_node_endpoint}'
 
         if self.direct_db_access:
             assert Path(self.chain_db_dir).exists(), f'Chain DB does not exist: {self.chain_db_dir}'
@@ -386,9 +388,7 @@ class Upstream(object):
                             if event['indexed'][0].startswith('ICXTransfer'):
                                 internal = {}
                                 internal['itx_target'] = event['indexed'][2]
-                                internal['itx_value'] = (
-                                    int(event['indexed'][3], 16) / 10 ** 18
-                                )
+                                internal['itx_value'] = int(event['indexed'][3], 16) / 10 ** 18
                                 tx_data['internal'].append(internal)
 
                         contract_txs.append(tx_data)
