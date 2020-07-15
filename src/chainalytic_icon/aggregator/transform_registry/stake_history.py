@@ -22,7 +22,9 @@ def unlock_period(total_stake, total_supply):
 
 
 class Transform(BaseTransform):
-    START_BLOCK_HEIGHT = FIRST_STAKE_BLOCK_HEIGHT = 7597365 # This is used in Aggregator service initialization
+    START_BLOCK_HEIGHT = (
+        FIRST_STAKE_BLOCK_HEIGHT
+    ) = 7597365  # This is used in Aggregator service initialization
 
     LAST_STATE_HEIGHT_KEY = b'last_state_height'
     LAST_TOTAL_STAKING_KEY = b'last_total_staking'
@@ -34,6 +36,7 @@ class Transform(BaseTransform):
         super(Transform, self).__init__(working_dir, transform_id)
 
     async def execute(self, height: int, input_data: dict) -> Optional[Dict]:
+        self.logger.debug(f'Executing: {self.transform_id}, height: {height}')
 
         cache_db = self.transform_cache_db
         cache_db_batch = self.transform_cache_db.write_batch()
@@ -184,7 +187,6 @@ class Transform(BaseTransform):
         cache_db_batch.put(
             Transform.LAST_TOTAL_UNSTAKING_WALLETS_KEY, str(total_unstaking_wallets).encode()
         )
-        cache_db_batch.write()
 
         data = {
             'total_staking': total_staking,
@@ -205,6 +207,10 @@ class Transform(BaseTransform):
             },
         }
 
-        self.save_last_output(output)
+        self.save_last_output(cache_db_batch, output)
+
+        cache_db_batch.write()
+
+        self.logger.debug(f'Executed: {self.transform_id}, height: {height}')
 
         return output

@@ -16,6 +16,7 @@ class Transform(BaseTransform):
         super(Transform, self).__init__(working_dir, transform_id)
 
     async def execute(self, height: int, input_data: dict) -> Optional[Dict]:
+        self.logger.debug(f'Executing: {self.transform_id}, height: {height}')
 
         cache_db = self.transform_cache_db
         cache_db_batch = self.transform_cache_db.write_batch()
@@ -64,9 +65,7 @@ class Transform(BaseTransform):
                         'itx_value': internal['itx_value'],
                     }
                     if internal['itx_value'] and tx['status']:
-                        updated_contracts[addr]['stats']['itx_volume'] += internal[
-                            'itx_value'
-                        ]
+                        updated_contracts[addr]['stats']['itx_volume'] += internal['itx_value']
             else:
                 updated_contracts[addr]['stats']['tx_count'] += 1
                 next_tx_id = updated_contracts[addr]['stats']['tx_count']
@@ -85,7 +84,6 @@ class Transform(BaseTransform):
             cache_db_batch.put(addr.encode(), json.dumps(updated_contracts[addr]['stats']).encode())
 
         cache_db_batch.put(Transform.LAST_STATE_HEIGHT_KEY, str(height).encode())
-        cache_db_batch.write()
 
         output = {
             'height': height,
@@ -95,6 +93,10 @@ class Transform(BaseTransform):
             },
         }
 
-        self.save_last_output(output)
+        self.save_last_output(cache_db_batch, output)
+
+        cache_db_batch.write()
+
+        self.logger.debug(f'Executed: {self.transform_id}, height: {height}')
 
         return output

@@ -60,13 +60,16 @@ class BaseTransform(object):
     def set_kernel(self, kernel: 'Kernel'):
         self.kernel = kernel
 
-    def save_last_output(self, output: dict):
-        self.transform_cache_db.put(BaseTransform.LAST_OUTPUT_KEY, json.dumps(output).encode())
+    def save_last_output(self, cache_db_batch, output: dict):
+        cache_db_batch.put(BaseTransform.LAST_OUTPUT_KEY, json.dumps(output).encode())
 
     def load_last_output(self) -> Optional[Dict]:
         output = self.transform_cache_db.get(BaseTransform.LAST_OUTPUT_KEY)
         if output:
-            return json.loads(output)
+            output = json.loads(output)
+            self.logger.warning('Loaded output of the last execution')
+            self.logger.warning(util.pretty(output))
+            return output
 
     def ensure_block_height_match(self, input_height) -> Optional[Dict]:
         """Make sure input block data represents for the next block of previous state cache."""
@@ -79,9 +82,8 @@ class BaseTransform(object):
                     f'Skipped executing transform {self.transform_id} due to mismatch in Transform cache DB and Storage'
                 )
                 self.logger.warning(
-                    f'----Cache DB height: {prev_state_height}, Storage DB height: {input_height}'
+                    f'----Transform cache height: {prev_state_height}, Storage height: {input_height - 1}'
                 )
-                self.logger.warning('Returned output of the last execution')
                 return 0
             else:
                 return 1
