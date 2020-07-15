@@ -25,3 +25,7 @@ log_dir: '.chainalytic_icon/{network_name}/log'
 # 40: ERROR
 # 50: CRITICAL
 log_level: 30
+
+transform_config:
+  contract_history:
+    max_tx_per_contract: 1000
