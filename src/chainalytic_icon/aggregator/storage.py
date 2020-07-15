@@ -99,7 +99,7 @@ class Storage(object):
         """
 
         height: int = api_params['height']
-        data: Union[Collection, bytes, str, float, int] = api_params['data']
+        data: Union[Collection, bytes, str, float, int] = api_params['block_data']
         transform_id: str = api_params['transform_id']
 
         db = self.transform_storage_dbs[transform_id]

@@ -50,6 +50,19 @@ class ApiBundle(object):
     async def latest_upstream_block_height(self, api_params: dict) -> Optional[int]:
         return await self.collator.latest_upstream_block_height()
 
+    async def get_block(self, api_params: dict) -> Optional[dict]:
+        if 'transform_id' in api_params:
+            return await self.collator.get_block(api_params['height'], api_params['transform_id'])
+
+    # ########################
+    # For `stake_history` only
+    #
+    async def latest_unstake_state(self, api_params: dict) -> Optional[dict]:
+        return await self.collator.latest_unstake_state()
+
+    # ###########################
+    # For `contract_history` only
+    #
     async def contract_transaction(self, api_params: dict) -> Optional[dict]:
         return await self.collator.contract_transaction(
             api_params['address'], int(api_params['size'])

@@ -121,6 +121,7 @@ direct_db_access: 1
 
 transforms:
   - contract_history
+  - stake_history
 
 storage_dir: '.chainalytic_icon/{network_name}/db'
 

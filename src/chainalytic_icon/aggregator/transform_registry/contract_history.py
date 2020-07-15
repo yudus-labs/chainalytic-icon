@@ -2,7 +2,6 @@ import json
 import time
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-import plyvel
 from iconservice.icon_config import default_icon_config
 from iconservice.icon_constant import ConfigKey
 from iconservice.iiss.engine import Engine

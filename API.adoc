@@ -2,6 +2,8 @@
 
 ### JSON-RPC requests
 
+## General
+
 #### latest_upstream_block_height
 [code]
 ----
@@ -10,6 +12,44 @@
     "api_id": "latest_upstream_block_height"
 }
 ----
+
+### latest_block_height
+[code]
+----
+"method": "call_api",
+"params": {
+    "api_id": "latest_block_height",
+    "api_params": {
+        "transform_id": <transform_id: str>
+    }
+}
+----
+
+#### get_block
+[code]
+----
+"method": "call_api",
+"params": {
+    "api_id": "get_block",
+    "api_params": {
+        "transform_id": <transform_id: str>
+        "height": <height: int>
+    }
+}
+----
+
+## `stake_history` transform
+
+#### latest_unstake_state
+[code]
+----
+"method": "call_api",
+"params": {
+    "api_id": "latest_unstake_state"
+}
+----
+
+## `contract_history` transform
 
 #### contract_internal_transaction
 [code]
