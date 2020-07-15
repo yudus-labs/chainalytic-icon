@@ -3,6 +3,7 @@ services:
   chainalytic-icon:
     image: duyyudus/chainalytic-icon
     container_name: chainalytic-icon
+    restart: always
     volumes:
       - /path/to/citizen.node/data/mainnet:/mainnet
       - ./.chainalytic_icon:/chainalytic_icon/.chainalytic_icon

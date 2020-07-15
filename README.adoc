@@ -92,6 +92,7 @@ services:
   chainalytic-icon:
     image: duyyudus/chainalytic-icon
     container_name: chainalytic-icon
+    restart: always
     volumes:
       - /path/to/data/mainnet:/mainnet # Modify this, or skip if not using fast mode `direct_db_access` in `config.yml`
       - ./.chainalytic_icon:/chainalytic_icon/.chainalytic_icon
