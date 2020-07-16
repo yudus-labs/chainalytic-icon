@@ -1,6 +1,6 @@
 network_name: 'icon_mainnet'
 
-citizen_node_endpoint: 'https://ctz.solidwallet.io'
+loopchain_node_endpoint: 'https://ctz.solidwallet.io'
 
 aggregator_endpoint: 'localhost:5500'
 provider_endpoint: 'localhost:5600'

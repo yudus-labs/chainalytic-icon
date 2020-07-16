@@ -82,7 +82,7 @@ async def aggregate_data():
 
         # A temp hack, for better coroutine scheduling
         else:
-            await asyncio.sleep(0.1)
+            await asyncio.sleep(0.05)
 
         t = time.time()
         for tid in _KERNEL.transforms:

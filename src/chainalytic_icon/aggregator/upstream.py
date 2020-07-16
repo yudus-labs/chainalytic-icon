@@ -20,7 +20,7 @@ def handle_client_failure(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         try:
-            http_provider = HTTPProvider(args[0].citizen_node_endpoint, 3)
+            http_provider = HTTPProvider(args[0].loopchain_node_endpoint, 3)
 
             if args[0].direct_db_access:
                 return func(*args, **kwargs)
@@ -30,7 +30,7 @@ def handle_client_failure(func):
                 return func(*args, **kwargs)
             else:
                 args[0].logger.warning(
-                    f'Citizen node is not connected: {args[0].citizen_node_endpoint}'
+                    f'Citizen node is not connected: {args[0].loopchain_node_endpoint}'
                 )
                 return None
 
@@ -71,9 +71,9 @@ class Upstream(object):
         self.chain_db_dir = self.config['chain_db_dir'] if self.config else ''
         self.score_db_icondex_dir = self.config['score_db_icondex_dir'] if self.config else ''
 
-        self.citizen_node_endpoint = self.config['citizen_node_endpoint'] if self.config else ''
-        if not self.citizen_node_endpoint.startswith('http'):
-            self.citizen_node_endpoint = f'http://{self.citizen_node_endpoint}'
+        self.loopchain_node_endpoint = self.config['loopchain_node_endpoint'] if self.config else ''
+        if not self.loopchain_node_endpoint.startswith('http'):
+            self.loopchain_node_endpoint = f'http://{self.loopchain_node_endpoint}'
 
         if self.direct_db_access:
             assert Path(self.chain_db_dir).exists(), f'Chain DB does not exist: {self.chain_db_dir}'
