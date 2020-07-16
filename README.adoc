@@ -1,19 +1,32 @@
 ## Chainalytic ICON
 
-A simpler, better, and more efficient version of link:https://github.com/yudus-lab/chainalytic-framework[Chainalytic Framework] dedicated for ICON blockchain networks.
+`Chainalytic ICON` is the successor of link:https://github.com/yudus-lab/chainalytic-framework[Chainalytic Framework] 
+
+It is more efficient and elegant, with better architecture, and well-tailored for ICON blockchain networks.
 
 NOTE: `Chainalytic Framework` is now deprecated and should be used only for reference and study. +
-For production, you should go with this `Chainalytic ICON`
+For production, you should go with `Chainalytic ICON`
+
+Jump to <<docker>>
+
+### Intro
 
 `Chainalytic ICON` is the engine for aggregating, transforming, and building new data from blockchain transactions ( also known as *transition functions* ) +
-It runs in form of a "node" ( a bit similar to blockchain node ) and be composed of `Aggregator` and `Provider` service, in which
+
+One of core feature is `Chainalytic ICON` runs in form of a "node" ( a bit similar to blockchain node ) and everyone can easily run *Chainalytic ICON node* for any *loopchain-based* network ( ICON mainnet, testnet, tbears, private chains...) and build new data upon their demand. +
+Given such ability, it could greatly help ICON developers to interact with their SCORE contract on private *loopchain* network.
+
+*Chainalytic ICON node* contains `Aggregator` and `Provider` service, in which
 
 - Each *data transform* has its own database and kept in sync with one *upstream* blockchain node belong to some network ( e.g. citizen node ) +
-- Provides an async JSON-RPC API for other applications to consume data.
+- Provides an `aiohttp` JSON-RPC API for other applications to consume data.
 
-Currently, there is only one built-in data transform `contract_history`. I will gradually port transforms from legacy `Chainalytic Framework` in the future.
+Currently, there are 2 built-in data transforms
 
-Ultimately, anyone can run a *Chainalytic ICON node* for any *loopchain-based* network ( ICON mainnet, testnet, tbears, private chains...) and build new data upon their demand.
+- `contract_history`
+- `stake_history` +
+
+We will gradually port transforms from legacy `Chainalytic Framework` in the future. You can also implement your own data transform as your need.
 
 Note that, it is neither analytic framework nor platform, its main purpose is data source backend for other applications, include analytic platforms.
 
@@ -77,6 +90,7 @@ venv/bin/python -m chainalytic_icon.aggregator --endpoint localhost:5500 --worki
 venv/bin/python -m chainalytic_icon.provider --endpoint localhost:5600 --working_dir .
 ----
 
+[[docker]]
 ## Production Docker `Chainalytic-ICON` node
 
 _Just clone `sample_docker_deploy` folder in this repo and edit from there_
@@ -103,21 +117,22 @@ services:
 
 ### Step 2
 
-Edit `.chainalytic_icon/cfg/config.yml` content, usually just need to edit `network_name`, `citizen_node_endpoint` and `direct_db_access`
+Edit `.chainalytic_icon/cfg/config.yml` content, usually just need to edit `network_name`, `loopchain_node_endpoint` and `direct_db_access`
 
 [source]
 ----
 network_name: 'icon_mainnet'
 
-citizen_node_endpoint: 'https://ctz.solidwallet.io' # Just feel free to choose your favorite citizen node
+loopchain_node_endpoint: 'https://ctz.solidwallet.io' # Just feel free to choose your favorite node
 
 aggregator_endpoint: '0.0.0.0:5500'
 provider_endpoint: '0.0.0.0:5600'
 
+# Only ICON mainnet has this DB backup
 chain_db_dir: '/mainnet/.storage/db_CHANGEIP:7100_icon_dex'
 score_db_icondex_dir: '/mainnet/.score_data/db/icon_dex'
 
-# 1 for fast reading data from leveldb, 0 for fetching block data from citizen node
+# 1 for fast reading data from leveldb, 0 for fetching block data from some loopchain node
 direct_db_access: 1
 
 transforms:
