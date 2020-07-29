@@ -469,7 +469,7 @@ class Storage(object):
         if stats:
             stats = json.loads(stats)
         else:
-            return {'transaction': [], 'height': height}
+            return {'transactions': [], 'height': height}
 
         latest_tx_id = stats['itx_count']
         txs = []
@@ -478,7 +478,7 @@ class Storage(object):
             if tx:
                 txs.append(json.loads(tx))
 
-        return {'transaction': txs, 'height': height}
+        return {'transactions': txs, 'height': height}
 
     def contract_stats(self, api_params: dict) -> dict:
         address: str = api_params['address']
