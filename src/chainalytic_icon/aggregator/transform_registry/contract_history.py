@@ -50,6 +50,7 @@ class Transform(BaseTransform):
                 else:
                     updated_contracts[addr]['stats'] = json.loads(updated_contracts[addr]['stats'])
 
+            # Internal txs
             if tx['internal']:
                 for internal in tx['internal']:
                     updated_contracts[addr]['stats']['itx_count'] += 1
@@ -66,20 +67,21 @@ class Transform(BaseTransform):
                     }
                     if internal['itx_value'] and tx['status']:
                         updated_contracts[addr]['stats']['itx_volume'] += internal['itx_value']
-            else:
-                updated_contracts[addr]['stats']['tx_count'] += 1
-                next_tx_id = updated_contracts[addr]['stats']['tx_count']
-                updated_contracts[addr]['tx'][f'{next_tx_id}'] = {
-                    'status': tx['status'],
-                    'height': height,
-                    'timestamp': tx['timestamp'],
-                    'hash': tx['hash'] if tx['hash'].startswith('0x') else f"0x{tx['hash']}",
-                    'from': tx['from'],
-                    'value': tx['value'],
-                    'fee': tx['fee'],
-                }
-                if tx['value'] and tx['status']:
-                    updated_contracts[addr]['stats']['tx_volume'] += tx['value']
+
+            # All txs
+            updated_contracts[addr]['stats']['tx_count'] += 1
+            next_tx_id = updated_contracts[addr]['stats']['tx_count']
+            updated_contracts[addr]['tx'][f'{next_tx_id}'] = {
+                'status': tx['status'],
+                'height': height,
+                'timestamp': tx['timestamp'],
+                'hash': tx['hash'] if tx['hash'].startswith('0x') else f"0x{tx['hash']}",
+                'from': tx['from'],
+                'value': tx['value'],
+                'fee': tx['fee'],
+            }
+            if tx['value'] and tx['status']:
+                updated_contracts[addr]['stats']['tx_volume'] += tx['value']
 
             cache_db_batch.put(addr.encode(), json.dumps(updated_contracts[addr]['stats']).encode())
 
