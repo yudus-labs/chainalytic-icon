@@ -7,7 +7,9 @@ It is more efficient and elegant, with better architecture, and well-tailored fo
 NOTE: `Chainalytic Framework` is now deprecated and should be used only for reference and study. +
 For production, you should go with `Chainalytic ICON`
 
-Jump to <<docker>>
+Jump to <<icon_mainnet_docker>>
+
+Jump to <<icon_local_docker>>
 
 ### Intro
 
@@ -24,7 +26,7 @@ Given such ability, it could greatly help ICON developers to interact with their
 Currently, there are 2 built-in data transforms
 
 - `contract_history`
-- `stake_history` +
+- `stake_history`
 
 We will gradually port transforms from legacy `Chainalytic Framework` in the future. You can also implement your own data transform as your need.
 
@@ -90,8 +92,8 @@ venv/bin/python -m chainalytic_icon.aggregator --endpoint localhost:5500 --worki
 venv/bin/python -m chainalytic_icon.provider --endpoint localhost:5600 --working_dir .
 ----
 
-[[docker]]
-## Production Docker `Chainalytic-ICON` node
+[[icon_mainnet_docker]]
+## Docker setup for ICON Mainnet
 
 _Just clone `sample_docker_deploy` folder in this repo and edit from there_
 
@@ -132,7 +134,7 @@ provider_endpoint: '0.0.0.0:5600'
 chain_db_dir: '/mainnet/.storage/db_CHANGEIP:7100_icon_dex'
 score_db_icondex_dir: '/mainnet/.score_data/db/icon_dex'
 
-# 1 for fast reading data from leveldb, 0 for fetching block data from some loopchain node
+# 1 for fast reading data from leveldb, 0 for fetching block data from loopchain node via JSON-RPC APIs ( slow )
 direct_db_access: 1
 
 transforms:
@@ -167,3 +169,51 @@ transform_config:
 Run Docker compose
 
 `docker-compose up -d`
+
+[[icon_local_docker]]
+## Docker setup for ICON local network `tbears` ( used with `ICX Contract Hub` )
+
+Same steps as mainnet, with below `config.yml`
+
+[source]
+----
+network_name: 'icon_local'
+
+loopchain_node_endpoint: 'http://localhost:9000'
+
+aggregator_endpoint: '0.0.0.0:5500'
+provider_endpoint: '0.0.0.0:5600'
+
+# These are irrelevant
+chain_db_dir: '/mainnet/.storage/db_CHANGEIP:7100_icon_dex'
+score_db_icondex_dir: '/mainnet/.score_data/db/icon_dex'
+
+# Always fetch via JSON-RPC API
+direct_db_access: 0
+
+# We need only `contract_history` data transform
+transforms:
+  - contract_history
+
+storage_dir: '.chainalytic_icon/{network_name}/db'
+
+transform_storage_dir: '{storage_dir}/{transform_id}_storage'
+transform_cache_dir: '{storage_dir}/{transform_id}_cache'
+
+log_dir: '.chainalytic_icon/{network_name}/log'
+
+# 10: DEBUG
+# 20: INFO
+# 30: WARNING
+# 40: ERROR
+# 50: CRITICAL
+log_level: 30
+
+transform_config:
+  contract_history:
+
+    # For efficient storage, 
+    # number of txs for each contract should be is limited to latest ones
+    # Set to 0 for storing all txs
+    max_tx_per_contract: 1000
+----
